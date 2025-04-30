@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>House Cleaning Schedule</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
+      padding: 30px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .assignments, .log {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f0f8ff;
+      border-left: 5px solid #4CAF50;
+      border-radius: 8px;
+    }
+    .checkbox-group label {
+      display: block;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto 0;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .log-entry {
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>House Cleaning Schedule</h2>
+    <div class="assignments" id="assignmentDisplay"></div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" id="mainRoom"> Main Room</label>
+      <label><input type="checkbox" id="lowerBathroom"> Lower Bathroom</label>
+      <label><input type="checkbox" id="upperBathroom"> Upper Bathroom</label>
+    </div>
+
+    <button onclick="saveStatus()">Save Status</button>
+
+    <div class="log">
+      <strong>Completion Log:</strong>
+      <div id="completionLog"></div>
+    </div>
+  </div>
+
+  <script>
+    const people = ["Karnav", "Vivek", "Manav P", "Manav D", "Yagna", "Riya"];
+    const today = new Date();
+    const index = today.getDate() % people.length;
+    const dateStr = today.toLocaleDateString();
+    const timeStr = today.toLocaleTimeString();
+
+    const assignments = {
+      "Main Room": people[(index + 0) % people.length],
+      "Lower Bathroom": people[(index + 1) % people.length],
+      "Upper Bathroom": people[(index + 2) % people.length]
+    };
+
+    const display = document.getElementById("assignmentDisplay");
+    display.innerHTML = `
+      <strong>Today's Assignments:</strong><br>
+      Main Room - ${assignments["Main Room"]}<br>
+      Lower Bathroom - ${assignments["Lower Bathroom"]}<br>
+      Upper Bathroom - ${assignments["Upper Bathroom"]}
+    `;
+
+    // Load saved status
+    document.getElementById("mainRoom").checked = localStorage.getItem("mainRoom") === "true";
+    document.getElementById("lowerBathroom").checked = localStorage.getItem("lowerBathroom") === "true";
+    document.getElementById("upperBathroom").checked = localStorage.getItem("upperBathroom") === "true";
+
+    loadLog();
+
+    function saveStatus() {
+      const logs = JSON.parse(localStorage.getItem("cleaningLogs") || "[]");
+      let updated = false;
+
+      if (document.getElementById("mainRoom").checked && localStorage.getItem("mainRoom") !== "true") {
+        logs.push(`${dateStr} ${timeStr}: Main Room cleaned by ${assignments["Main Room"]}`);
+        updated = true;
+      }
+      if (document.getElementById("lowerBathroom").checked && localStorage.getItem("lowerBathroom") !== "true") {
+        logs.push(`${dateStr} ${timeStr}: Lower Bathroom cleaned by ${assignments["Lower Bathroom"]}`);
+        updated = true;
+      }
+      if (document.getElementById("upperBathroom").checked && localStorage.getItem("upperBathroom") !== "true") {
+        logs.push(`${dateStr} ${timeStr}: Upper Bathroom cleaned by ${assignments["Upper Bathroom"]}`);
+        updated = true;
+      }
+
+      localStorage.setItem("mainRoom", document.getElementById("mainRoom").checked);
+      localStorage.setItem("lowerBathroom", document.getElementById("lowerBathroom").checked);
+      localStorage.setItem("upperBathroom", document.getElementById("upperBathroom").checked);
+      localStorage.setItem("cleaningLogs", JSON.stringify(logs));
+
+      if (updated) {
+        alert("Status saved and logged!");
+        loadLog();
+      } else {
+        alert("No new updates to save.");
+      }
+    }
+
+    function loadLog() {
+      const logs = JSON.parse(localStorage.getItem("cleaningLogs") || "[]");
+      const logContainer = document.getElementById("completionLog");
+      logContainer.innerHTML = logs.map(entry => `<div class='log-entry'>${entry}</div>`).join("");
+    }
+  </script>
+</body>
+</html>
